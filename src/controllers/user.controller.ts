@@ -99,4 +99,40 @@ export class UserController {
       sendResponse(res, status, false, error.message || ERROR_MESSAGES.SERVER_ERROR)
     }
   }
+
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const token = req.cookies?.token
+      if (!token) {
+        sendResponse(res, STATUS_CODES.UNAUTHORIZED, false, 'No token provided')
+        return
+      }
+      const user = await this.userService.me(token)
+      if (!user) {
+        sendResponse(res, STATUS_CODES.UNAUTHORIZED, false, 'Invalid token')
+        return
+      }
+      const data = req.body
+      const updatedUser = await this.userService.updateUser(user._id, data)
+      if (!updatedUser) {
+        sendResponse(res, STATUS_CODES.NOT_FOUND, false, ERROR_MESSAGES.NOT_FOUND)
+        return
+      }
+      sendResponse(res, STATUS_CODES.OK, true, 'Cập nhật thành công', updatedUser)
+    } catch (error: any) {
+      const status = error.status || error.statusCode || STATUS_CODES.INTERNAL_SERVER
+      sendResponse(res, status, false, error.message || ERROR_MESSAGES.SERVER_ERROR)
+    }
+  }
+
+  async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      res.clearCookie('token')
+      res.clearCookie('refreshToken')
+      sendResponse(res, STATUS_CODES.OK, true, 'Đăng xuất thành công')
+    } catch (error: any) {
+      const status = error.status || error.statusCode || STATUS_CODES.INTERNAL_SERVER
+      sendResponse(res, status, false, error.message || ERROR_MESSAGES.SERVER_ERROR)
+    }
+  }
 }

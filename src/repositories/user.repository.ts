@@ -16,6 +16,10 @@ export class UserRepository {
     return user.save()
   }
 
+  async update(userId: string, data: Partial<IUserInput>): Promise<IUser | null> {
+    return User.findByIdAndUpdate(userId, data, { new: true }).exec()
+  }
+
   async find(query?: any): Promise<IUser[]> {
     return User.find(query || {}).exec()
   }

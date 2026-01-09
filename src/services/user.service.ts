@@ -69,4 +69,12 @@ export class UserService {
     const refreshToken = bcrypt.genSaltSync(10)
     return { token, refreshToken }
   }
+
+  async updateUser(userId: string, data: Partial<IUserInput>): Promise<IUser | null> {
+    // Nếu có password mới thì hash lại
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10)
+    }
+    return this.userRepository.update(userId, data)
+  }
 }
