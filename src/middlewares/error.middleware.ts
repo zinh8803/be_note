@@ -11,7 +11,7 @@ export const errorHandler = (err: AppError, req: Request, res: Response, next: N
     success: false,
     message: err.message || 'Server Error',
     errors: (err as any).errors,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   })
 }
 
