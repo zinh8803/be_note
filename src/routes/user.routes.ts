@@ -12,4 +12,6 @@ router.get('/me', userController.me.bind(userController))
 router.post('/register', validate(userValidator), userController.register.bind(userController))
 router.post('/login', validate(loginValidator), userController.login.bind(userController))
 router.post('/logout', userController.logout.bind(userController))
+
+router.post('/refresh-token', userController.refreshToken.bind(userController))
 export default router
