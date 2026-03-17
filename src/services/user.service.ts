@@ -3,6 +3,7 @@ import { UserRepository } from '../repositories/user.repository'
 import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs'
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import RefreshTokenModel from '../models/RefreshToken'
 
 dotenv.config()
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret'
@@ -32,7 +33,24 @@ export class UserService {
   }
 
   async refreshToken(oldRefreshToken: string): Promise<any> {
-    // Implement refresh token logic here
+    // Tìm refreshToken trong DB
+    const found = await RefreshTokenModel.findOne({ token: oldRefreshToken })
+    if (!found) {
+      const error: any = new Error('Invalid refresh token')
+      error.status = 401
+      throw error
+    }
+    // Lấy userId từ refreshToken
+    const userId = found.UserId
+    const user = await this.userRepository.findById(userId)
+    if (!user) {
+      const error: any = new Error('User not found')
+      error.status = 404
+      throw error
+    }
+    // Tạo access token mới
+    const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1h' })
+    return { token }
   }
 
   async registerUser(data: IUserInput): Promise<IUser> {
@@ -67,11 +85,11 @@ export class UserService {
     }
     const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '1h' })
     const refreshToken = bcrypt.genSaltSync(10)
+    await RefreshTokenModel.create({ UserId: user._id.toString(), token: refreshToken })
     return { token, refreshToken }
   }
 
   async updateUser(userId: string, data: Partial<IUserInput>): Promise<IUser | null> {
-    // Nếu có password mới thì hash lại
     if (data.password) {
       data.password = await bcrypt.hash(data.password, 10)
     }

@@ -135,4 +135,27 @@ export class UserController {
       sendResponse(res, status, false, error.message || ERROR_MESSAGES.SERVER_ERROR)
     }
   }
+
+  async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { refreshToken } = req.body
+      if (!refreshToken) {
+        sendResponse(res, STATUS_CODES.BAD_REQUEST, false, 'No refresh token provided')
+        return
+      }
+      const { token: newToken } = await this.userService.refreshToken(refreshToken)
+      // Set new token in HTTP-only cookie
+      res.cookie('token', newToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000 // 1 hour
+      })
+      sendResponse(res, STATUS_CODES.OK, true, 'Token refreshed successfully', { token: newToken })
+    } catch (error: any) {
+      const status = error.status || error.statusCode || STATUS_CODES.INTERNAL_SERVER
+      sendResponse(res, status, false, error.message || ERROR_MESSAGES.SERVER_ERROR)
+    }
+  }
+
 }
