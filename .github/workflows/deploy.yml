@@ -22,7 +22,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            cd /var/www/note-app/be-note
+            cd /var/www/note-app/be_note
             git pull origin main
             npm install --production=false
             npm run build
