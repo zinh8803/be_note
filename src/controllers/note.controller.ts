@@ -76,7 +76,11 @@ export class NoteController {
         sendResponse(res, STATUS_CODES.UNAUTHORIZED, false, 'Invalid token')
         return
       }
-      const noteId = req.params.id
+      const noteId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      if (!noteId) {
+        sendResponse(res, STATUS_CODES.BAD_REQUEST, false, 'Invalid note id')
+        return
+      }
       const note = await this.noteService.getNoteById(noteId)
       if (!note) {
         sendResponse(res, STATUS_CODES.NOT_FOUND, false, ERROR_MESSAGES.NOT_FOUND)
@@ -110,7 +114,11 @@ export class NoteController {
         sendResponse(res, STATUS_CODES.UNAUTHORIZED, false, 'Invalid token')
         return
       }
-      const noteId = req.params.id
+      const noteId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      if (!noteId) {
+        sendResponse(res, STATUS_CODES.BAD_REQUEST, false, 'Invalid note id')
+        return
+      }
       const note = await this.noteService.getNoteById(noteId)
       if (!note) {
         sendResponse(res, STATUS_CODES.NOT_FOUND, false, ERROR_MESSAGES.NOT_FOUND)

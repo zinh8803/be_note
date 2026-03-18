@@ -17,7 +17,11 @@ export class UserController {
 
   async getUserById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = req.params.id
+      const userId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
+      if (!userId) {
+        sendResponse(res, STATUS_CODES.BAD_REQUEST, false, 'Invalid user id')
+        return
+      }
       if (userId === 'me') {
         const token = req.cookies?.token
         if (!token) {
@@ -157,5 +161,4 @@ export class UserController {
       sendResponse(res, status, false, error.message || ERROR_MESSAGES.SERVER_ERROR)
     }
   }
-
 }
